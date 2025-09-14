@@ -1,5 +1,6 @@
 package application;
 
+import database.TableCreator;
 import entities.Dia;
 import service.DiaService;
 import service.RelatorioService;
@@ -22,12 +23,12 @@ public class Main {
     private final String dataHoje = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 
     public static void main(String[] args) {
+        TableCreator.criarTabelas();
         new Main().menu();
     }
 
     public void menu() {
         int opcao;
-        // -------- Primeiro escolhe a data --------
         while (dia == null || dia.getData() == null) {
             titulo();
             System.out.println("1 - Definir Data");
@@ -52,7 +53,6 @@ public class Main {
             }
         }
 
-        // -------- Menu principal --------
         do {
             titulo();
             System.out.println("1 - Definir Data " + (dia.getData() != null ? "(" + dia.getDataFormatada() + ")" : ""));
@@ -64,7 +64,7 @@ public class Main {
             System.out.println("7 - Ver Resumo do Dia");
             System.out.println("8 - Editar Tarefa");
             System.out.println("9 - Remover Tarefa");
-            System.out.println("10 - Fazer relatório");
+            System.out.println("10 - Gerar relatório md");
             System.out.println("0 - Sair");
             System.out.print("Digite um número: ");
             try {
@@ -97,7 +97,7 @@ public class Main {
                     tarefaService.adicionarTarefa(dia, sc);
                     break;
                 case 7:
-                    System.out.println(dia);
+                    System.out.println(dia.toString());
                     break;
                 case 8:
                     tarefaService.editarTarefa(dia, sc);
@@ -106,8 +106,7 @@ public class Main {
                     tarefaService.removerTarefa(dia, sc);
                     break;
                 case 10:
-                    String md = relatorioService.gerarRelatorioMarkdown(dia);
-                    System.out.println(md);
+                    relatorioService.gerarRelatorioMarkdown(dia);
                     break;
                 default:
                     System.out.println("Selecione uma opção válida!");

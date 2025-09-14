@@ -111,7 +111,6 @@ public class Dia {
         long almocoMin = (inicioAlmoco != null && fimAlmoco != null)
                 ? Duration.between(inicioAlmoco, fimAlmoco).toMinutes()
                 : 0;
-
         long liquido = totalMin - almocoMin;
         long horas = liquido / 60;
         long minutos = liquido % 60;

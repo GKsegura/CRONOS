@@ -3,16 +3,13 @@ package entities;
 import org.jetbrains.annotations.NotNull;
 
 public class Task implements Comparable<Task> {
-    private Long id; // novo
+    private Long id;
     private String descricao;
     private Categoria categoria;
     private String cooperativa;
     private Long duracaoMin;
 
-    public Task(String descricao, Categoria categoria, String cooperativa){
-        this.descricao = descricao;
-        this.categoria = categoria;
-        this.cooperativa = cooperativa;
+    public Task(){
     }
 
     public Task(String descricao, Categoria categoria, String cooperativa, Long duracaoMin){
@@ -60,10 +57,6 @@ public class Task implements Comparable<Task> {
 
     public void setDuracaoMin(Long duracaoMin) {
         this.duracaoMin = duracaoMin;
-    }
-
-    public String getDuracaoHora(){
-        return formatarDuracao(duracaoMin);
     }
 
     @Override

@@ -24,23 +24,9 @@ public class SQLiteConnection {
             synchronized (SQLiteConnection.class) {
                 if (conn == null || conn.isClosed()) {
                     conn = DriverManager.getConnection(URL);
-                    //LOGGER.info("Conexão SQLite aberta com sucesso!");
                 }
             }
         }
         return conn;
-    }
-
-    public static void closeConnection() {
-        if (conn != null) {
-            try {
-                conn.close();
-                //LOGGER.info("Conexão SQLite fechada com sucesso!");
-            } catch (SQLException e) {
-               //LOGGER.log(Level.SEVERE, "Erro ao fechar a conexão SQLite", e);
-            } finally {
-                conn = null;
-            }
-        }
     }
 }

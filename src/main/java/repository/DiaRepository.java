@@ -12,7 +12,6 @@ import java.util.List;
 
 public class DiaRepository {
 
-    // ---------- DIA ----------
     public Dia insertDia(Dia dia) {
         String sql = "INSERT INTO dias(data, inicioTrabalho, fimTrabalho, inicioAlmoco, fimAlmoco) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = SQLiteConnection.getConnection();
@@ -55,7 +54,6 @@ public class DiaRepository {
         }
     }
 
-    // ---------- TASK ----------
     public Task insertTask(Task task, long diaId) {
         String sql = "INSERT INTO tarefas(descricao, categoria, cooperativa, duracaoMin, dia_id) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = SQLiteConnection.getConnection();
@@ -107,7 +105,6 @@ public class DiaRepository {
         }
     }
 
-    // ---------- FIND ----------
     public List<Dia> findAll() {
         List<Dia> dias = new ArrayList<>();
         String sql = "SELECT * FROM dias";
@@ -131,14 +128,12 @@ public class DiaRepository {
             e.printStackTrace();
         }
 
-        // Agora, fora do ResultSet, carrega as tarefas
         for (Dia d : dias) {
             d.getTarefas().addAll(findTasksByDia(d.getId()));
         }
 
         return dias;
     }
-
 
     private List<Task> findTasksByDia(long diaId) {
         List<Task> tarefas = new ArrayList<>();

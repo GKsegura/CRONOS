@@ -1,16 +1,20 @@
 package service;
 
-import entities.Dia;
-import entities.Task;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.TextStyle;
+import java.util.*;
+
+import entities.Dia;
+import entities.Task;
+import entities.Categoria;
 
 public class RelatorioService {
 
-    public String gerarRelatorioMarkdown(Dia dia) {
+    public void gerarRelatorioMarkdown(Dia dia) {
         StringBuilder md = new StringBuilder();
 
         md.append("# Relatório do Dia ").append(dia.getDataFormatada()).append("\n\n");
@@ -22,16 +26,36 @@ public class RelatorioService {
         md.append("- Fim do trabalho: ").append(formatHora(dia.getFimTrabalho())).append("\n");
         md.append("- Total de horas trabalhadas: ").append(dia.getHorasTrabalhadas()).append("\n\n");
 
-        md.append("## Tarefas\n");
+        md.append("## Tarefas por Categoria\n");
+
         if (dia.getTarefas().isEmpty()) {
             md.append("_Nenhuma tarefa registrada._\n");
         } else {
-            for (Task task : dia.getTarefas()) {
-                md.append("- **").append(task.getDescricao()).append("** ");
-                md.append(" [").append(task.getCategoria() != null ? task.getCategoria() : "N/A").append("]");
-                md.append(" [").append(task.getCooperativa() != null && !task.getCooperativa().isEmpty() ? task.getCooperativa() : "N/A").append("]");
-                if (task.getDuracaoMin() != null) {
-                    md.append(" [").append(task.getDuracaoHora()).append("]");
+            Map<Categoria, List<Task>> tarefasPorCategoria = new HashMap<>();
+            for (Task t : dia.getTarefas()) {
+                tarefasPorCategoria.computeIfAbsent(t.getCategoria(), k -> new ArrayList<>()).add(t);
+            }
+
+            List<Categoria> ordem = List.of(Categoria.SUPORTE, Categoria.REUNIAO, Categoria.SUPORTE_HORAS_PAGAS, Categoria.DESPESA_GERAL);
+
+            for (Categoria categoria : ordem) {
+                List<Task> tarefas = tarefasPorCategoria.get(categoria);
+                if (tarefas == null || tarefas.isEmpty()) continue;
+
+                String titulo = categoria.toString();
+                if (categoria == Categoria.REUNIAO) {
+                    long totalMinutos = tarefas.stream().filter(t -> t.getDuracaoMin() != null).mapToLong(Task::getDuracaoMin).sum();
+                    titulo += " [" + formatarDuracao(totalMinutos) + "]";
+                }
+
+                md.append("### ").append(titulo).append("\n");
+
+                for (Task t : tarefas) {
+                    md.append("- ").append(t.getDescricao()).append(" [").append(t.getCategoria()).append("]").append(" [").append(t.getCooperativa()).append("]");
+                    if (t.getDuracaoMin() != null) {
+                        md.append(" [").append(formatarDuracao(t.getDuracaoMin())).append("]");
+                    }
+                    md.append("\n");
                 }
                 md.append("\n");
             }
@@ -41,19 +65,31 @@ public class RelatorioService {
             Path pasta = Paths.get("relatorios");
             Files.createDirectories(pasta);
 
-            String nomeArquivo = "relatorio_" + dia.getDataParaArquivo() + ".md";
-            Files.writeString(pasta.resolve(nomeArquivo), md);
+            LocalDate hoje = LocalDate.now();
+            String diaSemana = hoje.getDayOfWeek()
+                    .getDisplayName(TextStyle.FULL, new Locale("pt", "BR"));
 
-            System.out.println("Relatório salvo com sucesso em: " + pasta.resolve(nomeArquivo).toAbsolutePath());
+            String nomeArquivoMD = "relatorio_" + dia.getDataParaArquivo() + diaSemana + ".md";
+            Path caminhoMD = pasta.resolve(nomeArquivoMD);
+
+            Files.writeString(caminhoMD, md);
+
+            System.out.println(md);
+
+            System.out.println("Relatório salvo com sucesso em: " + caminhoMD.toAbsolutePath());
         } catch (IOException e) {
             System.out.println("Erro ao salvar relatório: " + e.getMessage());
+            e.printStackTrace();
         }
-
-
-        return md.toString();
     }
 
     private String formatHora(java.time.LocalTime hora) {
         return hora == null ? "-" : hora.toString();
+    }
+
+    private String formatarDuracao(long minutos) {
+        long h = minutos / 60;
+        long m = minutos % 60;
+        return String.format("%dh%02dm", h, m);
     }
 }
