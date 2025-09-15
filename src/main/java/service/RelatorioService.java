@@ -65,11 +65,11 @@ public class RelatorioService {
             Path pasta = Paths.get("relatorios");
             Files.createDirectories(pasta);
 
-            LocalDate hoje = LocalDate.now();
-            String diaSemana = hoje.getDayOfWeek()
+            LocalDate dataDoDia = dia.getData();
+            String diaSemana = dataDoDia.getDayOfWeek()
                     .getDisplayName(TextStyle.FULL, new Locale("pt", "BR"));
 
-            String nomeArquivoMD = "relatorio_" + dia.getDataParaArquivo() + diaSemana + ".md";
+            String nomeArquivoMD = "relatorio_" + dia.getDataParaArquivo() + "_" + diaSemana + ".md";
             Path caminhoMD = pasta.resolve(nomeArquivoMD);
 
             Files.writeString(caminhoMD, md);
