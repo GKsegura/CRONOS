@@ -103,11 +103,6 @@ Licença MIT.
 English version
 # CRONOS
 
-![Java](https://img.shields.io/badge/Java-17+-blue.svg)
-![SQLite](https://img.shields.io/badge/SQLite-embutido-green.svg)
-![Licença: MIT](https://img.shields.io/badge/Licença-MIT-yellow.svg)
-![Status](https://img.shields.io/badge/status-ativo-success.svg)
-
 **CRONOS** is a console application to **log and generate daily support work reports**.  
 Track your workdays, start/end/lunch times, tasks, categories, and generate **automatic Markdown reports**.
 
@@ -170,7 +165,7 @@ Example:
 relatorio_2025-09-15_segunda-feira.md
 ```
 
-E o conteúdo fica assim:
+And the content is saved like this:
 
 ```markdown
 # Report for 15/09/2025
