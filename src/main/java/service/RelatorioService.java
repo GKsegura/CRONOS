@@ -51,7 +51,7 @@ public class RelatorioService {
                 md.append("### ").append(titulo).append("\n");
 
                 for (Task t : tarefas) {
-                    md.append("- ").append(t.getDescricao()).append(" [").append(t.getCategoria()).append("]").append(" [").append(t.getCooperativa()).append("]");
+                    md.append("- ").append(t.getDescricao()).append(" [").append(t.getCategoria()).append("]").append(" [").append(t.getCliente()).append("]");
                     if (t.getDuracaoMin() != null) {
                         md.append(" [").append(formatarDuracao(t.getDuracaoMin())).append("]");
                     }

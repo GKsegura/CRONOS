@@ -4,9 +4,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class Dia {
     private Long id;
@@ -15,7 +13,7 @@ public class Dia {
     private LocalTime fimTrabalho;
     private LocalTime inicioAlmoco;
     private LocalTime fimAlmoco;
-    private final List<Task> tarefas = new ArrayList<>();
+    private final Set<Task> tarefas = new TreeSet<>();
 
     private static final DateTimeFormatter FMT_HORA = DateTimeFormatter.ofPattern("H:mm");
     private static final DateTimeFormatter FMT_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -91,13 +89,12 @@ public class Dia {
         this.fimAlmoco = fimAlmoco;
     }
 
-    public List<Task> getTarefas() {
+    public Set<Task> getTarefas() {
         return tarefas;
     }
 
     public void addTarefa(Task tarefa) {
         tarefas.add(tarefa);
-        Collections.sort(tarefas);
     }
 
     public String getDataParaArquivo() {
@@ -132,6 +129,7 @@ public class Dia {
         sb.append("Fim do Almoço: ").append(formatarHora(fimAlmoco)).append("\n");
         sb.append("Horas Trabalhadas: ").append(getHorasTrabalhadas()).append("\n");
         sb.append("Tarefas:\n");
+
         for (Task t : tarefas) {
             sb.append(" - ").append(t).append("\n");
         }

@@ -21,7 +21,7 @@ public class TableCreator {
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "descricao TEXT NOT NULL," +
                 "categoria TEXT," +
-                "cooperativa TEXT," +
+                "cliente TEXT," +
                 "duracaoMin INTEGER," +
                 "dia_id INTEGER," +
                 "FOREIGN KEY(dia_id) REFERENCES dias(id));");
@@ -31,13 +31,14 @@ public class TableCreator {
         try (Connection conn = SQLiteConnection.getConnection();
              Statement stmt = conn.createStatement()) {
 
-            TABLES.values().forEach(sql -> {
-                try { stmt.execute(sql); } catch (SQLException e) { e.printStackTrace(); }
-            });
+            for (String sql : TABLES.values()) {
+                stmt.execute(sql);
+            }
 
-            System.out.println("Tabelas criadas com sucesso!");
         } catch (SQLException e) {
+            System.err.println("Erro crítico ao criar as tabelas: " + e.getMessage());
             e.printStackTrace();
+            System.exit(1);
         }
     }
 }

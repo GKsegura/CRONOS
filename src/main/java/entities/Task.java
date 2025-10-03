@@ -1,21 +1,19 @@
 package entities;
 
-import org.jetbrains.annotations.NotNull;
-
 public class Task implements Comparable<Task> {
     private Long id;
     private String descricao;
     private Categoria categoria;
-    private String cooperativa;
+    private String cliente;   // antes era cooperativa
     private Long duracaoMin;
 
-    public Task(){
+    public Task() {
     }
 
-    public Task(String descricao, Categoria categoria, String cooperativa, Long duracaoMin){
+    public Task(String descricao, Categoria categoria, String cliente, Long duracaoMin) {
         this.descricao = descricao;
         this.categoria = categoria;
-        this.cooperativa = cooperativa;
+        this.cliente = cliente;
         this.duracaoMin = duracaoMin;
     }
 
@@ -27,7 +25,7 @@ public class Task implements Comparable<Task> {
         this.id = id;
     }
 
-    public String getDescricao(){
+    public String getDescricao() {
         return this.descricao;
     }
 
@@ -43,12 +41,12 @@ public class Task implements Comparable<Task> {
         this.categoria = categoria;
     }
 
-    public String getCooperativa(){
-        return cooperativa;
+    public String getCliente() {
+        return cliente;
     }
 
-    public void setCooperativa(String cooperativa){
-        this.cooperativa = cooperativa;
+    public void setCliente(String cliente) {
+        this.cliente = cliente;
     }
 
     public Long getDuracaoMin() {
@@ -62,9 +60,9 @@ public class Task implements Comparable<Task> {
     @Override
     public String toString() {
         String cat = (categoria != null ? categoria.toString() : "Sem categoria");
-        String coop = (cooperativa != null && !cooperativa.isEmpty() ? cooperativa : "N/A");
+        String cli = (cliente != null && !cliente.isEmpty() ? cliente : "N/A");
 
-        String base = descricao + " [" + cat + "] [" + coop + "]";
+        String base = descricao + " [" + cat + "] [" + cli + "]";
 
         if (duracaoMin != null) {
             base += " (" + formatarDuracao(duracaoMin) + ")";
@@ -80,7 +78,9 @@ public class Task implements Comparable<Task> {
     }
 
     @Override
-    public int compareTo(@NotNull Task outra) {
-        return this.descricao.compareToIgnoreCase(outra.descricao);
+    public int compareTo(Task outra) {
+        String desc1 = this.descricao.trim();
+        String desc2 = outra.descricao.trim();
+        return desc1.compareToIgnoreCase(desc2);
     }
 }

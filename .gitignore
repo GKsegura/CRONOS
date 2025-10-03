@@ -1,13 +1,23 @@
+# -----------------------
+# Build / output folders
+# -----------------------
 target/
+build/
+out/
+
+# Exceções para Maven/Gradle wrapper
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# -----------------------
+# IDEs
+# -----------------------
 
 ### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
+.idea/
 *.iws
 *.iml
 *.ipr
@@ -23,19 +33,44 @@ target/
 
 ### NetBeans ###
 /nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
 
 ### VS Code ###
 .vscode/
 
-### Mac OS ###
+# -----------------------
+# OS-specific
+# -----------------------
 .DS_Store
+Thumbs.db
 
+# -----------------------
+# Database / local files
+# -----------------------
 relatorios/
 database.db
+
+# -----------------------
+# Logs and temporary files
+# -----------------------
+*.log
+*.tmp
+*.bak
+*.swp
+
+# -----------------------
+# Compiled Java classes
+# -----------------------
+*.class
+
+# -----------------------
+# Optional: archives
+# -----------------------
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz

@@ -5,8 +5,7 @@ import entities.Dia;
 import entities.Task;
 import repository.DiaRepository;
 
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class TarefaService {
     private final DiaRepository diaRepository = new DiaRepository();
@@ -15,16 +14,26 @@ public class TarefaService {
         System.out.print("Descrição da tarefa: ");
         String descricao = sc.nextLine();
 
-        System.out.print("Categoria (SUPORTE, REUNIAO, DESPESA_GERAL, SUPORTE_HORAS_PAGAS): ");
-        Categoria categoria = null;
-        try {
-            categoria = Categoria.valueOf(sc.nextLine().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            System.out.println("Categoria inválida. Será considerada N/A.");
+        Categoria[] categorias = Categoria.values();
+        System.out.println("Escolha a categoria:");
+        for (int i = 0; i < categorias.length; i++) {
+            System.out.println((i + 1) + " - " + categorias[i]);
         }
 
-        System.out.print("Cooperativa (opcional): ");
-        String cooperativa = sc.nextLine();
+        Categoria categoria = null;
+        try {
+            int catEscolha = Integer.parseInt(sc.nextLine()) - 1;
+            if (catEscolha >= 0 && catEscolha < categorias.length) {
+                categoria = categorias[catEscolha];
+            } else {
+                System.out.println("Opção inválida. Categoria será N/A.");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Entrada inválida. Categoria será N/A.");
+        }
+
+        System.out.print("Cliente (opcional): ");
+        String cliente = sc.nextLine();
 
         System.out.print("Duração em minutos (opcional): ");
         String duracaoInput = sc.nextLine();
@@ -37,14 +46,14 @@ public class TarefaService {
             }
         }
 
-        Task novaTarefa = new Task(descricao, categoria, cooperativa, duracao);
+        Task novaTarefa = new Task(descricao, categoria, cliente, duracao);
         diaRepository.insertTask(novaTarefa, dia.getId());
-        dia.addTarefa(novaTarefa);
+        dia.addTarefa(novaTarefa); // TreeSet já mantém ordenado
         System.out.println("Tarefa adicionada com sucesso!");
     }
 
     public void editarTarefa(Dia dia, Scanner sc) {
-        List<Task> tarefas = dia.getTarefas();
+        List<Task> tarefas = new ArrayList<>(dia.getTarefas()); // copia do TreeSet
         if (tarefas.isEmpty()) {
             System.out.println("Não há tarefas para editar.");
             return;
@@ -70,19 +79,28 @@ public class TarefaService {
         String descricao = sc.nextLine();
         if (!descricao.isEmpty()) tarefa.setDescricao(descricao);
 
-        System.out.print("Nova categoria (" + (tarefa.getCategoria() != null ? tarefa.getCategoria() : "N/A") + "): ");
+        System.out.println("Nova categoria (" + (tarefa.getCategoria() != null ? tarefa.getCategoria() : "N/A") + "): ");
+        Categoria[] categorias = Categoria.values();
+        for (int i = 0; i < categorias.length; i++) {
+            System.out.println((i + 1) + " - " + categorias[i]);
+        }
         String catInput = sc.nextLine();
         if (!catInput.isEmpty()) {
             try {
-                tarefa.setCategoria(Categoria.valueOf(catInput.toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                System.out.println("Categoria inválida. Mantida a anterior.");
+                int catEscolha = Integer.parseInt(catInput) - 1;
+                if (catEscolha >= 0 && catEscolha < categorias.length) {
+                    tarefa.setCategoria(categorias[catEscolha]);
+                } else {
+                    System.out.println("Opção inválida. Mantida a anterior.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Entrada inválida. Mantida a anterior.");
             }
         }
 
-        System.out.print("Nova cooperativa (" + tarefa.getCooperativa() + "): ");
-        String coop = sc.nextLine();
-        if (!coop.isEmpty()) tarefa.setCooperativa(coop);
+        System.out.print("Novo cliente (" + tarefa.getCliente() + "): ");
+        String cliente = sc.nextLine();
+        if (!cliente.isEmpty()) tarefa.setCliente(cliente);
 
         System.out.print("Nova duração em minutos (" + (tarefa.getDuracaoMin() != null ? tarefa.getDuracaoMin() : "N/A") + "): ");
         String durInput = sc.nextLine();
@@ -99,7 +117,7 @@ public class TarefaService {
     }
 
     public void removerTarefa(Dia dia, Scanner sc) {
-        List<Task> tarefas = dia.getTarefas();
+        List<Task> tarefas = new ArrayList<>(dia.getTarefas()); // copia do TreeSet
         if (tarefas.isEmpty()) {
             System.out.println("Não há tarefas para remover.");
             return;
@@ -119,8 +137,10 @@ public class TarefaService {
             return;
         }
 
-        Task tarefa = tarefas.remove(escolha);
+        Task tarefa = tarefas.get(escolha);
+        dia.getTarefas().remove(tarefa);
         diaRepository.deleteTaskById(tarefa.getId());
+
         System.out.println("Tarefa '" + tarefa.getDescricao() + "' removida com sucesso!");
     }
 }

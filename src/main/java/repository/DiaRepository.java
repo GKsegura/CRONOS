@@ -55,13 +55,13 @@ public class DiaRepository {
     }
 
     public Task insertTask(Task task, long diaId) {
-        String sql = "INSERT INTO tarefas(descricao, categoria, cooperativa, duracaoMin, dia_id) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO tarefas(descricao, categoria, cliente, duracaoMin, dia_id) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = SQLiteConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setString(1, task.getDescricao());
             ps.setString(2, task.getCategoria() != null ? task.getCategoria().name() : null);
-            ps.setString(3, task.getCooperativa());
+            ps.setString(3, task.getCliente());
             ps.setObject(4, task.getDuracaoMin(), Types.BIGINT);
             ps.setLong(5, diaId);
             ps.executeUpdate();
@@ -78,13 +78,13 @@ public class DiaRepository {
     }
 
     public void updateTask(Task task) {
-        String sql = "UPDATE tarefas SET descricao=?, categoria=?, cooperativa=?, duracaoMin=? WHERE id=?";
+        String sql = "UPDATE tarefas SET descricao=?, categoria=?, cliente=?, duracaoMin=? WHERE id=?";
         try (Connection conn = SQLiteConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, task.getDescricao());
             ps.setString(2, task.getCategoria() != null ? task.getCategoria().name() : null);
-            ps.setString(3, task.getCooperativa());
+            ps.setString(3, task.getCliente());
             ps.setObject(4, task.getDuracaoMin(), Types.BIGINT);
             ps.setLong(5, task.getId());
 
@@ -147,7 +147,7 @@ public class DiaRepository {
                 Task t = new Task(
                         rs.getString("descricao"),
                         rs.getString("categoria") != null ? Categoria.valueOf(rs.getString("categoria")) : null,
-                        rs.getString("cooperativa"),
+                        rs.getString("cliente"),
                         rs.getObject("duracaoMin") != null ? rs.getLong("duracaoMin") : null
                 );
                 t.setId(rs.getLong("id"));
