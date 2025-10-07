@@ -30,14 +30,14 @@ public class Main {
         int opcao;
         while (dia == null || dia.getData() == null) {
             titulo();
-            System.out.println(" 1 - Definir Data");
-            System.out.println(" 2 - Utilizar Data de hoje (" + dataHoje + ")");
-            System.out.println(" 0 - Sair");
-            System.out.print(" Digite um número: ");
+            System.out.println("1 - Definir Data");
+            System.out.println("2 - Utilizar Data de hoje (" + dataHoje + ")");
+            System.out.println("0 - Sair");
+            System.out.print("Digite um número: ");
             try {
                 opcao = Integer.parseInt(sc.nextLine());
             } catch (NumberFormatException e) {
-                System.out.println(" Opção inválida! Digite apenas números.");
+                System.out.println("Opção inválida! Digite apenas números.");
                 continue;
             }
             if (opcao == 1) {
@@ -45,35 +45,35 @@ public class Main {
             } else if (opcao == 2) {
                 this.dia = diaService.criarOuCarregarDia(dataHoje);
             } else if (opcao == 0) {
-                System.out.println(" Obrigado por usar nosso sistema!");
+                System.out.println("Obrigado por usar nosso sistema!");
                 return;
             } else {
-                System.out.println(" Opção inválida! Escolha 0, 1 ou 2.");
+                System.out.println("Opção inválida! Escolha 0, 1 ou 2.");
             }
         }
 
         do {
             titulo();
             int tam = dia.getTarefas().size() < 10 ? 58 : 59;
-            System.out.println(" " + "-".repeat(tam));
+            System.out.println("-".repeat(tam));
             System.out.println(resumo());
-            System.out.println(" " + "-".repeat(tam));
-            System.out.println(" 1 - Definir Data");
-            System.out.println(" 2 - Registrar Início do Trabalho");
-            System.out.println(" 3 - Registrar Fim do Trabalho");
-            System.out.println(" 4 - Registrar Início do Almoço");
-            System.out.println(" 5 - Registrar Fim do Almoço");
-            System.out.println(" 6 - Adicionar Tarefa");
-            System.out.println(" 7 - Ver Resumo do Dia");
-            System.out.println(" 8 - Editar Tarefa");
-            System.out.println(" 9 - Remover Tarefa");
-            System.out.println(" 10 - Gerar relatório md");
-            System.out.println(" 0 - Sair");
-            System.out.print(" Digite um número: ");
+            System.out.println("-".repeat(tam));
+            System.out.println("1 - Definir Data");
+            System.out.println("2 - Registrar Início do Trabalho");
+            System.out.println("3 - Registrar Fim do Trabalho");
+            System.out.println("4 - Registrar Início do Almoço");
+            System.out.println("5 - Registrar Fim do Almoço");
+            System.out.println("6 - Adicionar Tarefa");
+            System.out.println("7 - Ver Resumo do Dia");
+            System.out.println("8 - Editar Tarefa");
+            System.out.println("9 - Remover Tarefa");
+            System.out.println("10 - Gerar relatório md");
+            System.out.println("0 - Sair");
+            System.out.print("Digite um número: ");
             try {
                 opcao = Integer.parseInt(sc.nextLine());
             } catch (NumberFormatException e) {
-                System.out.println(" Opção inválida! Digite apenas números.");
+                System.out.println("Opção inválida! Digite apenas números.");
                 opcao = -1;
             }
             switch (opcao) {
@@ -81,19 +81,19 @@ public class Main {
                     definirDataManual();
                     break;
                 case 2:
-                    LocalTime inicio = lerHorario(" Início do trabalho (HH:mm): ", null, dia.getFimTrabalho(), null, "Não pode ser depois do fim do trabalho");
+                    LocalTime inicio = lerHorario("Início do trabalho (HH:mm): ", null, dia.getFimTrabalho(), null, "Não pode ser depois do fim do trabalho");
                     diaService.atualizarInicioTrabalho(dia, inicio);
                     break;
                 case 3:
-                    LocalTime fim = lerHorario(" Fim do trabalho (HH:mm): ", dia.getInicioTrabalho(), null, "Não pode ser antes do início do trabalho", null);
+                    LocalTime fim = lerHorario("Fim do trabalho (HH:mm): ", dia.getInicioTrabalho(), null, "Não pode ser antes do início do trabalho", null);
                     diaService.atualizarFimTrabalho(dia, fim);
                     break;
                 case 4:
-                    LocalTime almocoIni = lerHorario(" Início do almoço (HH:mm): ", dia.getInicioTrabalho(), dia.getFimAlmoco(), "Almoço não pode ser antes do início do trabalho", "Início do almoço não pode ser depois do fim do almoço");
+                    LocalTime almocoIni = lerHorario("Início do almoço (HH:mm): ", dia.getInicioTrabalho(), dia.getFimAlmoco(), "Almoço não pode ser antes do início do trabalho", "Início do almoço não pode ser depois do fim do almoço");
                     diaService.atualizarInicioAlmoco(dia, almocoIni);
                     break;
                 case 5:
-                    LocalTime almocoFim = lerHorario(" Fim do almoço (HH:mm): ", dia.getInicioAlmoco(), dia.getFimTrabalho(), "Fim do almoço não pode ser antes do início do almoço", "Não pode ser depois do fim do trabalho");
+                    LocalTime almocoFim = lerHorario("Fim do almoço (HH:mm): ", dia.getInicioAlmoco(), dia.getFimTrabalho(), "Fim do almoço não pode ser antes do início do almoço", "Não pode ser depois do fim do trabalho");
                     diaService.atualizarFimAlmoco(dia, almocoFim);
                     break;
                 case 6:
@@ -112,15 +112,15 @@ public class Main {
                     relatorioService.gerarRelatorioMarkdown(dia);
                     break;
                 default:
-                    if (opcao != 0) System.out.println(" Selecione uma opção válida!");
+                    if (opcao != 0) System.out.println("Selecione uma opção válida!");
                     break;
             }
             if (opcao != 0) {
-                System.out.print(" Pressione Enter para continuar...");
+                System.out.print("Pressione Enter para continuar...");
                 sc.nextLine();
             }
         } while (opcao != 0);
-        System.out.println(" Obrigado por usar nosso sistema!");
+        System.out.println("Obrigado por usar nosso sistema!");
     }
 
     private static String formatHora(LocalTime hora) {
@@ -130,15 +130,15 @@ public class Main {
     private void definirDataManual() {
         boolean dataValida = false;
         while (!dataValida) {
-            System.out.print(" Informe a data (dd/MM/yyyy): ");
+            System.out.print("Informe a data (dd/MM/yyyy): ");
             String inputData = sc.nextLine();
             try {
                 this.dia = diaService.criarOuCarregarDia(inputData);
                 dataValida = true;
             } catch (DateTimeParseException e) {
-                System.out.println(" Data inválida! Use o formato dd/MM/yyyy. Tente novamente.");
+                System.out.println("Data inválida! Use o formato dd/MM/yyyy. Tente novamente.");
             } catch (Exception e) {
-                System.out.println(" Erro ao carregar/criar dia: " + e.getMessage());
+                System.out.println("Erro ao carregar/criar dia: " + e.getMessage());
             }
         }
     }
@@ -161,7 +161,7 @@ public class Main {
                 }
                 valido = true;
             } catch (DateTimeParseException e) {
-                System.out.println(" Formato inválido! Use HH:mm, ex: 08:30");
+                System.out.println("Formato inválido! Use HH:mm, ex: 08:30");
             }
         } while (!valido);
         return horario;
@@ -169,10 +169,10 @@ public class Main {
 
     public String resumo() {
         StringBuilder sb = new StringBuilder();
-        sb.append(" Data: ").append(dia.getDataFormatada()).append(" | Início: ").append(formatOrPlaceholder(dia.getInicioTrabalho())).append(" | Fim: ").append(formatOrPlaceholder(dia.getFimTrabalho())).append(" | Tarefas: ").append(dia.getTarefas() == null ? 0 : dia.getTarefas().size());
+        sb.append("Data: ").append(dia.getDataFormatada()).append(" | Início: ").append(formatOrPlaceholder(dia.getInicioTrabalho())).append(" | Fim: ").append(formatOrPlaceholder(dia.getFimTrabalho())).append(" | Tarefas: ").append(dia.getTarefas() == null ? 0 : dia.getTarefas().size());
 
         if (dia.getInicioAlmoco() != null || dia.getFimAlmoco() != null) {
-            sb.append("\n Almoço: ").append(formatOrPlaceholder(dia.getInicioAlmoco())).append(" - ").append(formatOrPlaceholder(dia.getFimAlmoco()));
+            sb.append("\nAlmoço: ").append(formatOrPlaceholder(dia.getInicioAlmoco())).append(" - ").append(formatOrPlaceholder(dia.getFimAlmoco()));
             if (!"00:00".equals(dia.getHorasTrabalhadas())) {
                 sb.append(" | Horas trabalhadas: ").append(dia.getHorasTrabalhadas());
             }
@@ -201,12 +201,12 @@ public class Main {
     public void textoCentralizado(String txt, int tamanho) {
         int tamanhoTxt = txt.length();
         if (tamanhoTxt >= tamanho) {
-            System.out.println(" " + txt);
+            System.out.println(txt);
             return;
         }
         int espacos = (tamanho - tamanhoTxt) / 2;
         String padding = " ".repeat(espacos);
-        System.out.println(" " + padding + txt + padding);
+        System.out.println(padding + txt + padding);
     }
 
     private void limparTela() {
@@ -218,7 +218,7 @@ public class Main {
                 System.out.flush();
             }
         } catch (Exception e) {
-            System.out.println(" Não foi possível limpar a tela.");
+            System.out.println("Não foi possível limpar a tela.");
         }
     }
 

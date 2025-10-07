@@ -1,4 +1,7 @@
 @echo off
+REM ===========================
+REM Script para executar CRONOS
+REM ===========================
 
 REM Caminho da pasta raiz do projeto
 SET ROOT_DIR=%~dp0
@@ -10,9 +13,6 @@ IF ERRORLEVEL 1 (
     echo ERRO: Java nao encontrado. Instale o JDK e configure a variavel PATH.
     pause
     exit /b 1
-) ELSE  (
-    echo Java encontrado com sucesso echo Versao do Java instalada:
-    call java -version
 )
 
 REM Caminho do JAR com dependencias
@@ -23,14 +23,12 @@ IF NOT EXIST "%JAR_FILE%" (
     echo ERRO: JAR nao encontrado! Compile o projeto primeiro usando buildCronos.bat
     pause
     exit /b 1
-) ELSE (
-    echo JAR encontrado com sucesso: %JAR_FILE%
 )
 
 echo.
-echo ====================================================================================================
+echo ===========================
 echo Executando CRONOS...
-echo ====================================================================================================
+echo ===========================
 java -jar "%JAR_FILE%"
 
 echo.

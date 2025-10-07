@@ -15,10 +15,10 @@ public class TarefaService {
         String descricao = sc.nextLine();
 
         Categoria[] categorias = Categoria.values();
-        System.out.println("Escolha a categoria:");
         for (int i = 0; i < categorias.length; i++) {
             System.out.println((i + 1) + " - " + categorias[i]);
         }
+        System.out.print("Escolha a categoria:");
 
         Categoria categoria = null;
         try {
@@ -79,11 +79,11 @@ public class TarefaService {
         String descricao = sc.nextLine();
         if (!descricao.isEmpty()) tarefa.setDescricao(descricao);
 
-        System.out.println("Nova categoria (" + (tarefa.getCategoria() != null ? tarefa.getCategoria() : "N/A") + "): ");
         Categoria[] categorias = Categoria.values();
         for (int i = 0; i < categorias.length; i++) {
             System.out.println((i + 1) + " - " + categorias[i]);
         }
+        System.out.print("Nova categoria (" + (tarefa.getCategoria() != null ? tarefa.getCategoria() : "N/A") + "): ");
         String catInput = sc.nextLine();
         if (!catInput.isEmpty()) {
             try {
