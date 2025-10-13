@@ -1,5 +1,6 @@
 package service;
 
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,7 +14,7 @@ import entities.Task;
 import entities.Categoria;
 
 public class RelatorioService {
-
+    DiaService diaService = new DiaService();
     public void gerarRelatorioMarkdown(Dia dia) {
         StringBuilder md = new StringBuilder();
 
@@ -74,7 +75,7 @@ public class RelatorioService {
 
             Files.writeString(caminhoMD, md);
 
-            System.out.println(md);
+//            System.out.println(md);
 
             System.out.println("Relatório salvo com sucesso em: " + caminhoMD.toAbsolutePath());
         } catch (IOException e) {
@@ -82,6 +83,57 @@ public class RelatorioService {
             e.printStackTrace();
         }
     }
+
+    public void gerarRelatoriosMarkdownMes(Dia dia) {
+        LocalDate dataDoDia = dia.getData();
+        int ano = dataDoDia.getYear();
+        int mes = dataDoDia.getMonthValue();
+
+        List<Dia> diasDoMes = Dia.getDiasDoMes(ano, mes);
+        System.out.println("Gerando relatórios para " + diasDoMes.size() + " dias do mês " + mes + "/" + ano);
+        for (Dia d : diasDoMes) {
+            try {
+                System.out.println("Gerando relatório para o dia: " + d.getDataFormatada());
+                Dia diaCompleto = diaService.criarOuCarregarDia(d.getDataFormatada());
+                gerarRelatorioMarkdown(diaCompleto);
+                System.out.println("Relatório gerado para o dia: " + d.getDataFormatada());
+            } catch (Exception e) {
+                System.err.println("Erro ao gerar relatório do dia " + d.getDataFormatada() + ": " + e.getMessage());
+            }
+        }
+        System.out.println("Relatórios do mês gerados com sucesso.");
+    }
+
+    public void excluirRelatorioMesPassado(Dia dia) {
+        try {
+            Path pasta = Paths.get("relatorios");
+            Files.createDirectories(pasta);
+
+            LocalDate dataDoDia = dia.getData();
+            LocalDate mesPassado = dataDoDia.minusMonths(1);
+            String mesPassadoStr = String.format("%04d-%02d", mesPassado.getYear(), mesPassado.getMonthValue());
+
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(pasta, "relatorio_" + mesPassadoStr + "-*.md")) {
+                int count = 0;
+
+                for (Path entry : stream) {
+                    Files.delete(entry);
+                    System.out.println("Relatório excluído: " + entry.getFileName());
+                    count++;
+                }
+
+                if (count == 0) {
+                    System.out.println("Nenhum relatório encontrado para o mês passado: " + mesPassadoStr);
+                } else {
+                    System.out.println(count + " relatório(s) do mês passado excluído(s): " + mesPassadoStr);
+                }
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException("Erro ao excluir relatórios do mês passado", e);
+        }
+    }
+
 
     private String formatHora(java.time.LocalTime hora) {
         return hora == null ? "-" : hora.toString();

@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.List;
 
 public class Dia {
     private Long id;
@@ -19,6 +20,10 @@ public class Dia {
     private static final DateTimeFormatter FMT_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public Dia() {}
+
+    public Dia(LocalDate data) {
+        this.data = data;
+    }
 
     public Dia(LocalDate data, LocalTime inicioTrabalho, LocalTime fimTrabalho,
                LocalTime inicioAlmoco, LocalTime fimAlmoco) {
@@ -91,6 +96,21 @@ public class Dia {
 
     public Set<Task> getTarefas() {
         return tarefas;
+    }
+
+    public static List<Dia> getDiasDoMes(int ano, int mes) {
+        List<Dia> dias = new ArrayList<>();
+
+        LocalDate primeiroDia = LocalDate.of(ano, mes, 1);
+        int ultimoDia = primeiroDia.lengthOfMonth();
+
+        for (int dia = 1; dia <= ultimoDia; dia++) {
+            LocalDate data = LocalDate.of(ano, mes, dia);
+            if (data.isAfter(LocalDate.now())) break;
+            dias.add(new Dia(data));
+        }
+
+        return dias;
     }
 
     public void addTarefa(Task tarefa) {
