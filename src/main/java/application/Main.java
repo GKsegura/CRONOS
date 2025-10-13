@@ -1,5 +1,6 @@
 package application;
 
+import api.ApiServer;
 import database.TableCreator;
 import entities.Dia;
 import service.DiaService;
@@ -33,7 +34,47 @@ public class Main {
 
     public static void main(String[] args) {
         TableCreator.criarTabelas();
-        new Main().menu();
+
+        boolean modoApi = false;
+        boolean modoTerminal = false;
+
+        if (args.length > 0) {
+            String modo = args[0].toLowerCase();
+            if (modo.equals("api")) {
+                modoApi = true;
+                modoTerminal = false;
+            } else if (modo.equals("hibrido")) {
+                modoApi = true;
+                modoTerminal = true;
+            }
+        }
+
+        Thread apiThread = null;
+
+        if (modoApi) {
+            apiThread = new Thread(() -> {
+                System.out.println("Iniciando servidor API CRONOS...");
+                ApiServer.start();
+            });
+
+            if (modoTerminal) {
+                apiThread.setDaemon(true);
+            }
+
+            apiThread.start();
+        }
+
+        if (modoTerminal) {
+            System.out.println("Iniciando CRONOS em modo terminal...");
+            new Main().menu();
+        } else if (modoApi) {
+            System.out.println("Modo API iniciado. Pressione CTRL+C para encerrar.");
+            try {
+                apiThread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void menu() {

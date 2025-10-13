@@ -25,12 +25,45 @@ IF NOT EXIST "%JAR_FILE%" (
     exit /b 1
 )
 
+:MENU
+cls
+echo ===========================
+echo       CRONOS - EXECUCAO
+echo ===========================
 echo.
-echo ===========================
-echo Executando CRONOS...
-echo ===========================
-java -jar "%JAR_FILE%"
+echo Escolha o modo de execucao:
+echo   [1]- Terminal (CLI)
+echo   [2] - API
+echo   [3] - Hibrido (Terminal + API)
+echo   [0] - Sair
+echo.
+set /p MODO="Digite o numero correspondente: "
 
+IF "%MODO%"=="1" (
+    echo Iniciando CRONOS em modo Terminal...
+    java -jar "%JAR_FILE%"
+    goto FIM
+)
+IF "%MODO%"=="2" (
+    echo Iniciando CRONOS em modo API...
+    java -jar "%JAR_FILE%" api
+    goto FIM
+)
+IF "%MODO%"=="3" (
+    echo Iniciando CRONOS em modo Hibrido (Terminal + API)...
+    java -jar "%JAR_FILE%" hibrido
+    goto FIM
+)
+IF "%MODO%"=="0" (
+    echo Saindo...
+    exit /b 0
+)
+
+echo Opcao invalida! Tente novamente.
+pause
+goto MENU
+
+:FIM
 echo.
 echo Programa finalizado.
 pause

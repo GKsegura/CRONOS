@@ -32,6 +32,9 @@ echo Compilacao concluida com sucesso!
 echo Arquivos gerados em %ROOT_DIR%target\
 echo ====================================================================================================
 
+REM Executa o CRONOS e espera ele terminar
+call runCronos.bat
+
 :end
 echo.
 pause
