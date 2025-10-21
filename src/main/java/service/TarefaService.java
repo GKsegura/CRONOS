@@ -12,17 +12,32 @@ public class TarefaService {
 
     public void adicionarTarefa(Dia dia, Scanner sc) {
         System.out.print("Descrição da tarefa: ");
-        String descricao = sc.nextLine();
+        String descricao = sc.nextLine().toUpperCase();
+        if (descricao.toLowerCase().contains("chamado")) {
+            String[] partes = descricao.split(" ");
+            for (String parte : partes) {
+                if (parte.matches("\\d+")) {
+                    String numeroChamado = parte;
+                    boolean chamadoExiste = dia.getTarefas().stream()
+                            .anyMatch(t -> t.getDescricao().toLowerCase().contains("chamado " + numeroChamado));
+                    if (chamadoExiste) {
+                        System.out.println("Já existe uma tarefa com o chamado " + numeroChamado + ".");
+                        return;
+                    }
+                    break;
+                }
+            }
+        }
 
         Categoria[] categorias = Categoria.values();
         for (int i = 0; i < categorias.length; i++) {
             System.out.println((i + 1) + " - " + categorias[i]);
         }
-        System.out.print("Escolha a categoria:");
+        System.out.print("Escolha a categoria: ");
 
         Categoria categoria = null;
         try {
-            int catEscolha = Integer.parseInt(sc.nextLine()) - 1;
+            int catEscolha = Integer.parseInt(sc.nextLine().toUpperCase()) - 1;
             if (catEscolha >= 0 && catEscolha < categorias.length) {
                 categoria = categorias[catEscolha];
             } else {
@@ -33,10 +48,10 @@ public class TarefaService {
         }
 
         System.out.print("Cliente (opcional): ");
-        String cliente = sc.nextLine();
+        String cliente = sc.nextLine().toUpperCase();
 
         System.out.print("Duração em minutos (opcional): ");
-        String duracaoInput = sc.nextLine();
+        String duracaoInput = sc.nextLine().toUpperCase();
         Long duracao = null;
         if (!duracaoInput.isEmpty()) {
             try {
@@ -48,7 +63,7 @@ public class TarefaService {
 
         Task novaTarefa = new Task(descricao, categoria, cliente, duracao);
         diaRepository.insertTask(novaTarefa, dia.getId());
-        dia.addTarefa(novaTarefa); // TreeSet já mantém ordenado
+        dia.addTarefa(novaTarefa);
         System.out.println("Tarefa adicionada com sucesso!");
     }
 
@@ -66,7 +81,7 @@ public class TarefaService {
 
         int escolha = -1;
         try {
-            escolha = Integer.parseInt(sc.nextLine()) - 1;
+            escolha = Integer.parseInt(sc.nextLine().toUpperCase()) - 1;
         } catch (NumberFormatException ignored) {}
         if (escolha < 0 || escolha >= tarefas.size()) {
             System.out.println("Opção inválida.");
@@ -76,7 +91,7 @@ public class TarefaService {
         Task tarefa = tarefas.get(escolha);
 
         System.out.print("Nova descrição (" + tarefa.getDescricao() + "): ");
-        String descricao = sc.nextLine();
+        String descricao = sc.nextLine().toUpperCase();
         if (!descricao.isEmpty()) tarefa.setDescricao(descricao);
 
         Categoria[] categorias = Categoria.values();
@@ -84,7 +99,7 @@ public class TarefaService {
             System.out.println((i + 1) + " - " + categorias[i]);
         }
         System.out.print("Nova categoria (" + (tarefa.getCategoria() != null ? tarefa.getCategoria() : "N/A") + "): ");
-        String catInput = sc.nextLine();
+        String catInput = sc.nextLine().toUpperCase();
         if (!catInput.isEmpty()) {
             try {
                 int catEscolha = Integer.parseInt(catInput) - 1;
@@ -99,11 +114,11 @@ public class TarefaService {
         }
 
         System.out.print("Novo cliente (" + tarefa.getCliente() + "): ");
-        String cliente = sc.nextLine();
+        String cliente = sc.nextLine().toUpperCase();
         if (!cliente.isEmpty()) tarefa.setCliente(cliente);
 
         System.out.print("Nova duração em minutos (" + (tarefa.getDuracaoMin() != null ? tarefa.getDuracaoMin() : "N/A") + "): ");
-        String durInput = sc.nextLine();
+        String durInput = sc.nextLine().toUpperCase();
         if (!durInput.isEmpty()) {
             try {
                 tarefa.setDuracaoMin(Long.parseLong(durInput));
@@ -130,7 +145,7 @@ public class TarefaService {
 
         int escolha = -1;
         try {
-            escolha = Integer.parseInt(sc.nextLine()) - 1;
+            escolha = Integer.parseInt(sc.nextLine().toUpperCase()) - 1;
         } catch (NumberFormatException ignored) {}
         if (escolha < 0 || escolha >= tarefas.size()) {
             System.out.println("Opção inválida.");

@@ -74,9 +74,6 @@ public class RelatorioService {
             Path caminhoMD = pasta.resolve(nomeArquivoMD);
 
             Files.writeString(caminhoMD, md);
-
-//            System.out.println(md);
-
             System.out.println("Relatório salvo com sucesso em: " + caminhoMD.toAbsolutePath());
         } catch (IOException e) {
             System.out.println("Erro ao salvar relatório: " + e.getMessage());

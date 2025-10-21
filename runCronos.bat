@@ -32,7 +32,7 @@ echo       CRONOS - EXECUCAO
 echo ===========================
 echo.
 echo Escolha o modo de execucao:
-echo   [1]- Terminal (CLI)
+echo   [1] - Terminal (CLI)
 echo   [2] - API
 echo   [3] - Hibrido (Terminal + API)
 echo   [0] - Sair
@@ -41,17 +41,17 @@ set /p MODO="Digite o numero correspondente: "
 
 IF "%MODO%"=="1" (
     echo Iniciando CRONOS em modo Terminal...
-    java -jar "%JAR_FILE%"
+    java --enable-native-access=ALL-UNNAMED -jar "%JAR_FILE%"
     goto FIM
 )
 IF "%MODO%"=="2" (
     echo Iniciando CRONOS em modo API...
-    java -jar "%JAR_FILE%" api
+    java --enable-native-access=ALL-UNNAMED -jar "%JAR_FILE%" api
     goto FIM
 )
 IF "%MODO%"=="3" (
     echo Iniciando CRONOS em modo Hibrido (Terminal + API)...
-    java -jar "%JAR_FILE%" hibrido
+    java --enable-native-access=ALL-UNNAMED -jar "%JAR_FILE%" hibrido
     goto FIM
 )
 IF "%MODO%"=="0" (
