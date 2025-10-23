@@ -44,7 +44,7 @@ public class Main {
                 apiThread.setDaemon(true);
             }
 
-            apiThread.start();
+            ApiServer.start();
         }
 
         if (modoTerminal) {

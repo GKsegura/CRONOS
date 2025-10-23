@@ -113,21 +113,18 @@ public class DiaRepository {
     public List<Dia> findAll() {
         List<Dia> dias = new ArrayList<>();
         String sql = "SELECT * FROM dias";
+
         try (Connection conn = SQLiteConnection.getConnection();
-                Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery(sql)) {
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
                 Dia dia = new Dia();
                 dia.setId(rs.getLong("id"));
                 dia.setData(rs.getString("data"));
-                dia.setInicioTrabalho(
-                        rs.getString("inicioTrabalho") != null ? LocalTime.parse(rs.getString("inicioTrabalho"))
-                                : null);
-                dia.setFimTrabalho(
-                        rs.getString("fimTrabalho") != null ? LocalTime.parse(rs.getString("fimTrabalho")) : null);
-                dia.setInicioAlmoco(
-                        rs.getString("inicioAlmoco") != null ? LocalTime.parse(rs.getString("inicioAlmoco")) : null);
+                dia.setInicioTrabalho(rs.getString("inicioTrabalho") != null ? LocalTime.parse(rs.getString("inicioTrabalho")) : null);
+                dia.setFimTrabalho(rs.getString("fimTrabalho") != null ? LocalTime.parse(rs.getString("fimTrabalho")) : null);
+                dia.setInicioAlmoco(rs.getString("inicioAlmoco") != null ? LocalTime.parse(rs.getString("inicioAlmoco")) : null);
                 dia.setFimAlmoco(rs.getString("fimAlmoco") != null ? LocalTime.parse(rs.getString("fimAlmoco")) : null);
 
                 dias.add(dia);
@@ -148,18 +145,21 @@ public class DiaRepository {
         List<Task> tarefas = new ArrayList<>();
         String sql = "SELECT * FROM tarefas WHERE dia_id=?";
         try (Connection conn = SQLiteConnection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setLong(1, diaId);
-            ResultSet rs = ps.executeQuery();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            while (rs.next()) {
-                Task t = new Task(
-                        rs.getString("descricao"),
-                        rs.getString("categoria") != null ? Categoria.valueOf(rs.getString("categoria")) : null,
-                        rs.getString("cliente"),
-                        rs.getObject("duracaoMin") != null ? rs.getLong("duracaoMin") : null);
-                t.setId(rs.getLong("id"));
-                tarefas.add(t);
+            ps.setLong(1, diaId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Task t = new Task(
+                            rs.getString("descricao"),
+                            rs.getString("categoria") != null ? Categoria.valueOf(rs.getString("categoria")) : null,
+                            rs.getString("cliente"),
+                            rs.getObject("duracaoMin") != null ? rs.getLong("duracaoMin") : null
+                    );
+                    t.setId(rs.getLong("id"));
+                    tarefas.add(t);
+                }
             }
 
         } catch (SQLException e) {
@@ -167,4 +167,46 @@ public class DiaRepository {
         }
         return tarefas;
     }
+
+    public Dia findById(long id) {
+        String sql = "SELECT * FROM dias WHERE id = ?";
+        try (Connection conn = SQLiteConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, id);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                Dia dia = new Dia();
+                dia.setId(rs.getLong("id"));
+                dia.setData(rs.getString("data"));
+                dia.setInicioTrabalho(rs.getString("inicioTrabalho") != null ? LocalTime.parse(rs.getString("inicioTrabalho")) : null);
+                dia.setFimTrabalho(rs.getString("fimTrabalho") != null ? LocalTime.parse(rs.getString("fimTrabalho")) : null);
+                dia.setInicioAlmoco(rs.getString("inicioAlmoco") != null ? LocalTime.parse(rs.getString("inicioAlmoco")) : null);
+                dia.setFimAlmoco(rs.getString("fimAlmoco") != null ? LocalTime.parse(rs.getString("fimAlmoco")) : null);
+
+                dia.getTarefas().addAll(findTasksByDia(dia.getId()));
+                return dia;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean deleteDia(long id) {
+        String sql = "DELETE FROM dias WHERE id = ?";
+        try (Connection conn = SQLiteConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, id);
+            int rows = ps.executeUpdate();
+            return rows > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    
 }
