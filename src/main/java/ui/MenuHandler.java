@@ -60,8 +60,8 @@ public class MenuHandler {
             System.out.println(resumoDia());
             System.out.println("-".repeat(tam));
             mostrarMenuPrincipal();
-            opcao = ConsoleUtils.lerInteiro("Digite um número: ", 0, 12, sc);
-            executarOpcao(opcao);
+            opcao = ConsoleUtils.lerInteiro("Digite um número: ", 0, 4, sc);
+            executarOpcaoPrincipal(opcao);
             if (opcao != 0) ConsoleUtils.pausar(sc);
         } while (opcao != 0);
 
@@ -69,113 +69,202 @@ public class MenuHandler {
     }
 
     private void mostrarMenuPrincipal() {
-        System.out.println("1 - Definir Data");
-        System.out.println("2 - Registrar Início do Trabalho");
-        System.out.println("3 - Registrar Fim do Trabalho");
-        System.out.println("4 - Registrar Início do Almoço");
-        System.out.println("5 - Registrar Fim do Almoço");
-        System.out.println("6 - Adicionar Tarefa");
-        System.out.println("7 - Ver Resumo do Dia");
-        System.out.println("8 - Editar Tarefa");
-        System.out.println("9 - Remover Tarefa");
-        System.out.println("10 - Gerar relatório md do dia");
-        System.out.println("11 - Gerar relatórios md do mês");
-        System.out.println("12 - Excluir relatórios md do mês passado");
+        System.out.println("=== MENU PRINCIPAL ===");
+        System.out.println("1 - Gerenciar Horários");
+        System.out.println("2 - Gerenciar Tarefas");
+        System.out.println("3 - Relatórios");
+        System.out.println("4 - Alterar Data");
         System.out.println("0 - Sair");
     }
 
-    private void executarOpcao(int opcao) {
-        ConsoleUtils.titulo();
-
+    private void executarOpcaoPrincipal(int opcao) {
         switch (opcao) {
             case 1:
+                menuHorarios();
+                break;
+            case 2:
+                menuTarefas();
+                break;
+            case 3:
+                menuRelatorios();
+                break;
+            case 4:
                 definirDataManual();
                 break;
-
-            case 2:
-                LocalTime inicio = ConsoleUtils.lerHorario(
-                        "Início do trabalho (HH:mm): ",
-                        null,
-                        dia.getFimTrabalho(),
-                        null,
-                        "Não pode ser depois do fim do trabalho",
-                        sc
-                );
-                diaService.atualizarInicioTrabalho(dia, inicio);
-                break;
-
-            case 3:
-                LocalTime fim = ConsoleUtils.lerHorario(
-                        "Fim do trabalho (HH:mm): ",
-                        dia.getInicioTrabalho(),
-                        null,
-                        "Não pode ser antes do início do trabalho",
-                        null,
-                        sc
-                );
-                diaService.atualizarFimTrabalho(dia, fim);
-                break;
-
-            case 4:
-                LocalTime almocoIni = ConsoleUtils.lerHorario(
-                        "Início do almoço (HH:mm): ",
-                        dia.getInicioTrabalho(),
-                        dia.getFimAlmoco(),
-                        "Almoço não pode ser antes do início do trabalho",
-                        "Início do almoço não pode ser depois do fim do almoço",
-                        sc
-                );
-                diaService.atualizarInicioAlmoco(dia, almocoIni);
-                break;
-
-            case 5:
-                LocalTime almocoFim = ConsoleUtils.lerHorario(
-                        "Fim do almoço (HH:mm): ",
-                        dia.getInicioAlmoco(),
-                        dia.getFimTrabalho(),
-                        "Fim do almoço não pode ser antes do início do almoço",
-                        "Não pode ser depois do fim do trabalho",
-                        sc
-                );
-                diaService.atualizarFimAlmoco(dia, almocoFim);
-                break;
-
-            case 6:
-                tarefaService.adicionarTarefa(dia, sc);
-                break;
-
-            case 7:
-                System.out.println(dia.toString());
-                break;
-
-            case 8:
-                tarefaService.editarTarefa(dia, sc);
-                break;
-
-            case 9:
-                tarefaService.removerTarefa(dia, sc);
-                break;
-
-            case 10:
-                relatorioService.gerarRelatorioMarkdown(dia);
-                break;
-
-            case 11:
-                relatorioService.gerarRelatoriosMarkdownMes(dia);
-                break;
-
-            case 12:
-                relatorioService.excluirRelatorioMesPassado(dia);
-                break;
-
             case 0:
                 // Sai do menu
                 break;
-
             default:
                 System.out.println("Selecione uma opção válida!");
                 break;
         }
+    }
+
+    private void menuHorarios() {
+        int opcao;
+        do {
+            ConsoleUtils.titulo();
+            System.out.println(resumoDia());
+            System.out.println("-".repeat(60));
+            System.out.println("=== GERENCIAR HORÁRIOS ===");
+            System.out.println("1 - Registrar Início do Trabalho");
+            System.out.println("2 - Registrar Fim do Trabalho");
+            System.out.println("3 - Registrar Início do Almoço");
+            System.out.println("4 - Registrar Fim do Almoço");
+            System.out.println("5 - Ver Resumo do Dia");
+            System.out.println("0 - Voltar");
+
+            opcao = ConsoleUtils.lerInteiro("Digite um número: ", 0, 5, sc);
+
+            ConsoleUtils.titulo();
+            switch (opcao) {
+                case 1:
+                    LocalTime inicio = ConsoleUtils.lerHorario(
+                            "Início do trabalho (HH:mm): ",
+                            null,
+                            dia.getFimTrabalho(),
+                            null,
+                            "Não pode ser depois do fim do trabalho",
+                            sc
+                    );
+                    diaService.atualizarInicioTrabalho(dia, inicio);
+                    break;
+
+                case 2:
+                    LocalTime fim = ConsoleUtils.lerHorario(
+                            "Fim do trabalho (HH:mm): ",
+                            dia.getInicioTrabalho(),
+                            null,
+                            "Não pode ser antes do início do trabalho",
+                            null,
+                            sc
+                    );
+                    diaService.atualizarFimTrabalho(dia, fim);
+                    break;
+
+                case 3:
+                    LocalTime almocoIni = ConsoleUtils.lerHorario(
+                            "Início do almoço (HH:mm): ",
+                            dia.getInicioTrabalho(),
+                            dia.getFimAlmoco(),
+                            "Almoço não pode ser antes do início do trabalho",
+                            "Início do almoço não pode ser depois do fim do almoço",
+                            sc
+                    );
+                    diaService.atualizarInicioAlmoco(dia, almocoIni);
+                    break;
+
+                case 4:
+                    LocalTime almocoFim = ConsoleUtils.lerHorario(
+                            "Fim do almoço (HH:mm): ",
+                            dia.getInicioAlmoco(),
+                            dia.getFimTrabalho(),
+                            "Fim do almoço não pode ser antes do início do almoço",
+                            "Não pode ser depois do fim do trabalho",
+                            sc
+                    );
+                    diaService.atualizarFimAlmoco(dia, almocoFim);
+                    break;
+
+                case 5:
+                    System.out.println(dia.toString());
+                    break;
+
+                case 0:
+                    return;
+
+                default:
+                    System.out.println("Selecione uma opção válida!");
+                    break;
+            }
+
+            if (opcao != 0) ConsoleUtils.pausar(sc);
+        } while (opcao != 0);
+    }
+
+    private void menuTarefas() {
+        int opcao;
+        do {
+            ConsoleUtils.titulo();
+            System.out.println(resumoDia());
+            System.out.println("-".repeat(60));
+            System.out.println("=== GERENCIAR TAREFAS ===");
+            System.out.println("1 - Adicionar Tarefa");
+            System.out.println("2 - Editar Tarefa");
+            System.out.println("3 - Remover Tarefa");
+            System.out.println("4 - Ver Resumo do Dia");
+            System.out.println("0 - Voltar");
+
+            opcao = ConsoleUtils.lerInteiro("Digite um número: ", 0, 4, sc);
+
+            ConsoleUtils.titulo();
+            switch (opcao) {
+                case 1:
+                    tarefaService.adicionarTarefa(dia, sc);
+                    break;
+
+                case 2:
+                    tarefaService.editarTarefa(dia, sc);
+                    break;
+
+                case 3:
+                    tarefaService.removerTarefa(dia, sc);
+                    break;
+
+                case 4:
+                    System.out.println(dia.toString());
+                    break;
+
+                case 0:
+                    return;
+
+                default:
+                    System.out.println("Selecione uma opção válida!");
+                    break;
+            }
+
+            if (opcao != 0) ConsoleUtils.pausar(sc);
+        } while (opcao != 0);
+    }
+
+    private void menuRelatorios() {
+        int opcao;
+        do {
+            ConsoleUtils.titulo();
+            System.out.println(resumoDia());
+            System.out.println("-".repeat(60));
+            System.out.println("=== RELATÓRIOS ===");
+            System.out.println("1 - Gerar Relatório MD do Dia");
+            System.out.println("2 - Gerar Relatórios MD do Mês");
+            System.out.println("3 - Excluir Relatórios MD do Mês Passado");
+            System.out.println("0 - Voltar");
+
+            opcao = ConsoleUtils.lerInteiro("Digite um número: ", 0, 3, sc);
+
+            ConsoleUtils.titulo();
+            switch (opcao) {
+                case 1:
+                    relatorioService.gerarRelatorioMarkdown(dia);
+                    break;
+
+                case 2:
+                    relatorioService.gerarRelatoriosMarkdownMes(dia);
+                    break;
+
+                case 3:
+                    relatorioService.excluirRelatorioMesPassado(dia);
+                    break;
+
+                case 0:
+                    return;
+
+                default:
+                    System.out.println("Selecione uma opção válida!");
+                    break;
+            }
+
+            if (opcao != 0) ConsoleUtils.pausar(sc);
+        } while (opcao != 0);
     }
 
     private void definirDataManual() {
