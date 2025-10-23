@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import entities.Dia;
 import entities.Task;
@@ -36,7 +37,7 @@ public class RelatorioService {
         if (dia.getTarefas().isEmpty()) {
             md.append("_Nenhuma tarefa registrada._\n");
         } else {
-            Map<Categoria, List<Task>> tarefasPorCategoria = new HashMap<>();
+            Map<Categoria, List<Task>> tarefasPorCategoria = new TreeMap<>();
             for (Task t : dia.getTarefas()) {
                 tarefasPorCategoria.computeIfAbsent(t.getCategoria(), k -> new ArrayList<>()).add(t);
             }
@@ -143,7 +144,6 @@ public class RelatorioService {
     public String calcularHorasSemana(Dia diaReferencia) {
         LocalDate dataRef = diaReferencia.getData();
 
-        // Obtém segunda e sexta da semana
         LocalDate segunda = dataRef.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate sexta = dataRef.with(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY));
 
@@ -153,7 +153,6 @@ public class RelatorioService {
         int totalMinutos = 0;
         int diasTrabalhados = 0;
 
-        // Percorre todos os dias da semana (segunda a sexta)
         LocalDate dataAtual = segunda;
         while (!dataAtual.isAfter(sexta)) {
             String dataFormatada = dataAtual.format(formatter);
@@ -179,7 +178,6 @@ public class RelatorioService {
             dataAtual = dataAtual.plusDays(1);
         }
 
-        // Formata resultado
         StringBuilder sb = new StringBuilder();
         sb.append("\n╔════════════════════════════════════════════════════════╗\n");
         sb.append("║     RELATÓRIO SEMANAL DE HORAS TRABALHADAS         ║\n");
@@ -189,28 +187,23 @@ public class RelatorioService {
                 sexta.format(formatter)));
         sb.append("╠════════════════════════════════════════════════════════╣\n");
 
-        // Lista dias da semana - 56 caracteres internos
         for (DiaInfo info : diasSemana) {
             String linha = String.format(" %s - %s │ %s",
                     info.diaSemana.trim(),
                     info.dataFormatada,
                     info.horasFormatadas);
-            // Completa com espaços até 56 caracteres
             int espacosFaltando = 56 - linha.length();
             sb.append("║").append(linha).append(" ".repeat(espacosFaltando)).append("║\n");
         }
 
         sb.append("╠════════════════════════════════════════════════════════╣\n");
 
-        // Dias trabalhados - 56 caracteres internos
         String linhaDias = String.format(" Dias trabalhados: %d", diasTrabalhados);
         sb.append("║").append(linhaDias).append(" ".repeat(56 - linhaDias.length())).append("║\n");
 
-        // Total de horas - 56 caracteres internos
         String linhaTotal = String.format(" Total de horas: %s", formatarMinutosParaHoras(totalMinutos));
         sb.append("║").append(linhaTotal).append(" ".repeat(56 - linhaTotal.length())).append("║\n");
 
-        // Calcula média diária - 56 caracteres internos
         if (diasTrabalhados > 0) {
             int mediaDiaria = totalMinutos / diasTrabalhados;
             String linhaMedia = String.format(" Média diária: %s", formatarMinutosParaHoras(mediaDiaria));
@@ -233,7 +226,6 @@ public class RelatorioService {
         int minutosTotais = (int) dia.getInicioTrabalho().until(dia.getFimTrabalho(),
                 java.time.temporal.ChronoUnit.MINUTES);
 
-        // Subtrai tempo de almoço
         if (dia.getInicioAlmoco() != null && dia.getFimAlmoco() != null) {
             int minutosAlmoco = (int) dia.getInicioAlmoco().until(dia.getFimAlmoco(),
                     java.time.temporal.ChronoUnit.MINUTES);
@@ -288,4 +280,226 @@ public class RelatorioService {
         int minutosTrabalhados;
         String horasFormatadas;
     }
+
+    public String contarChamadosSemana(Dia diaReferencia) {
+        LocalDate dataRef = diaReferencia.getData();
+        LocalDate segunda = dataRef.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate sexta = dataRef.with(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY));
+
+        int totalChamados = 0;
+        Set<String> chamadosUnicos = new TreeSet<>();
+        Map<String, List<Task>> chamadosPorDia = new LinkedHashMap<>();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate atual = segunda;
+
+        while (!atual.isAfter(sexta)) {
+            Dia dia = diaService.buscarDia(atual.format(formatter));
+            List<Task> chamados = new ArrayList<>();
+
+            if (dia != null && dia.getTarefas() != null) {
+                chamados = dia.getTarefas().stream()
+                        .filter(t -> t.getDescricao() != null && t.getDescricao().toLowerCase().contains("chamado"))
+                        .collect(Collectors.toList());
+
+                totalChamados += chamados.size();
+
+                for (Task t : chamados) {
+                    String desc = t.getDescricao();
+                    String numero = extrairNumeroChamado(desc);
+                    if (numero != null) chamadosUnicos.add(numero);
+                }
+            }
+
+            chamadosPorDia.put(atual.format(formatter), chamados);
+            atual = atual.plusDays(1);
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n╔════════════════════════════════════════════════════════════╗\n");
+        sb.append("║                RELATÓRIO SEMANAL DE CHAMADOS               ║\n");
+        sb.append("╠════════════════════════════════════════════════════════════╣\n");
+        sb.append(String.format("║ Período: %s a %s%s║\n",
+                segunda.format(formatter),
+                sexta.format(formatter),
+                " ".repeat(Math.max(0, 21 - (segunda.format(formatter).length() + sexta.format(formatter).length())))));
+        sb.append("╠════════════════════════════════════════════════════════════╣\n");
+
+        for (Map.Entry<String, List<Task>> entry : chamadosPorDia.entrySet()) {
+            String data = entry.getKey();
+            List<Task> chamados = entry.getValue();
+
+            sb.append(String.format("║ %s -> %d chamado(s)%s║\n",
+                    data,
+                    chamados.size(),
+                    " ".repeat(Math.max(0, 32 - String.valueOf(chamados.size()).length()))));
+
+            if (!chamados.isEmpty()) {
+                for (Task t : chamados) {
+                    String cliente = (t.getCliente() != null && !t.getCliente().isEmpty()) ? t.getCliente() : "Sem cliente";
+                    String duracao = (t.getDuracaoMin() != null) ? formatarDuracao(t.getDuracaoMin()) : "--";
+                    String descricao = t.getDescricao().length() > 35 ? t.getDescricao().substring(0, 35) + "..." : t.getDescricao();
+
+                    sb.append(String.format("║   - %-36s [%s] [%s]%s║\n",
+                            descricao,
+                            cliente,
+                            duracao,
+                            " ".repeat(Math.max(0, 5))));
+                }
+            } else {
+                sb.append("║   Nenhum chamado registrado nesse dia.            ║\n");
+            }
+
+            sb.append("╠────────────────────────────────────────────────────────────╣\n");
+        }
+
+        sb.append(String.format("║ TOTAL SEMANA: %d chamado(s)%s║\n",
+                totalChamados,
+                " ".repeat(Math.max(0, 31 - String.valueOf(totalChamados).length()))));
+        sb.append(String.format("║ CHAMADOS ÚNICOS: %d%s║\n",
+                chamadosUnicos.size(),
+                " ".repeat(Math.max(0, 35 - String.valueOf(chamadosUnicos.size()).length()))));
+        sb.append("╠════════════════════════════════════════════════════════════╣\n");
+
+        if (!chamadosUnicos.isEmpty()) {
+            sb.append("║ Chamados únicos da semana:                           ║\n");
+            sb.append("║ ").append(String.join(", ", chamadosUnicos)).append("\n");
+        } else {
+            sb.append("║ Nenhum número de chamado identificado.               ║\n");
+        }
+
+        sb.append("╚════════════════════════════════════════════════════════════╝\n");
+
+        return sb.toString();
+    }
+
+    /**
+     * Extrai o número do chamado da descrição.
+     * Exemplo: "Chamado 1234 - Erro X" → "1234"
+     */
+    private String extrairNumeroChamado(String descricao) {
+        if (descricao == null) return null;
+        var matcher = java.util.regex.Pattern.compile("\\b(\\d{3,6})\\b").matcher(descricao);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
+    }
+
+    public String contarChamadosMes(Dia diaReferencia) {
+        LocalDate dataRef = diaReferencia.getData();
+        int ano = dataRef.getYear();
+        int mes = dataRef.getMonthValue();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        Set<String> chamadosUnicos = new TreeSet<>(); // evita duplicados e ordena
+        Map<String, Integer> chamadosContagem = new TreeMap<>(); // número do chamado → quantidade
+        Map<String, List<Task>> tarefasPorDia = new LinkedHashMap<>();
+
+        List<Dia> diasDoMes = Dia.getDiasDoMes(ano, mes);
+        int totalChamados = 0;
+
+        for (Dia d : diasDoMes) {
+            Dia dia = diaService.buscarDia(d.getDataFormatada());
+            List<Task> tarefasDia = new ArrayList<>();
+
+            if (dia != null && dia.getTarefas() != null) {
+                tarefasDia = dia.getTarefas().stream()
+                        .filter(t -> t.getDescricao() != null && t.getDescricao().toLowerCase().contains("chamado"))
+                        .collect(Collectors.toList());
+
+                totalChamados += tarefasDia.size();
+
+                // Extrai números e conta reincidência
+                for (Task t : tarefasDia) {
+                    String numero = extrairNumeroChamado(t.getDescricao());
+                    if (numero != null) {
+                        chamadosUnicos.add(numero);
+                        chamadosContagem.merge(numero, 1, Integer::sum);
+                    }
+                }
+            }
+
+            tarefasPorDia.put(d.getDataFormatada(), tarefasDia);
+        }
+
+        String nomeMes = dataRef.getMonth().getDisplayName(TextStyle.FULL, new Locale("pt", "BR"));
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("\n==========================================================\n");
+        sb.append("      CCCCC   RRRRR   OOOOO   N   N   OOOOO   SSSSS\n");
+        sb.append("      C       R   R   O   O   NN  N   O   O   S\n");
+        sb.append("      C       RRRRR   O   O   N N N   O   O   SSSSS\n");
+        sb.append("      C       R  R    O   O   N  NN   O   O       S\n");
+        sb.append("      CCCCC   R   R   OOOOO   N   N   OOOOO   SSSSS\n");
+        sb.append("==========================================================\n");
+        sb.append(String.format("                 GKsegura - %d\n\n", ano));
+        sb.append("╔════════════════════════════════════════════════════════════╗\n");
+        sb.append("║                 RELATÓRIO MENSAL DE CHAMADOS               ║\n");
+        sb.append("╠════════════════════════════════════════════════════════════╣\n");
+        sb.append(String.format("║ Mês: %-20s Ano: %-10d ║\n", nomeMes.toUpperCase(), ano));
+        sb.append("╠════════════════════════════════════════════════════════════╣\n");
+
+        for (Map.Entry<String, List<Task>> entry : tarefasPorDia.entrySet()) {
+            String data = entry.getKey();
+            List<Task> chamadosDia = entry.getValue();
+
+            sb.append(String.format("║ %s → %d chamado(s)%s║\n",
+                    data,
+                    chamadosDia.size(),
+                    " ".repeat(Math.max(0, 32 - String.valueOf(chamadosDia.size()).length()))));
+
+            if (!chamadosDia.isEmpty()) {
+                for (Task t : chamadosDia) {
+                    String cliente = (t.getCliente() != null && !t.getCliente().isEmpty()) ? t.getCliente() : "Sem cliente";
+                    String duracao = (t.getDuracaoMin() != null) ? formatarDuracao(t.getDuracaoMin()) : "--";
+                    String descricao = t.getDescricao().length() > 35 ? t.getDescricao().substring(0, 35) + "..." : t.getDescricao();
+
+                    sb.append(String.format("║   - %-36s [%s] [%s]%s║\n",
+                            descricao,
+                            cliente,
+                            duracao,
+                            " ".repeat(Math.max(0, 5))));
+                }
+            } else {
+                sb.append("║   Nenhum chamado registrado nesse dia.            ║\n");
+            }
+
+            sb.append("╠────────────────────────────────────────────────────────────╣\n");
+        }
+
+        sb.append(String.format("║ TOTAL MÊS: %d chamado(s)%s║\n",
+                totalChamados,
+                " ".repeat(Math.max(0, 33 - String.valueOf(totalChamados).length()))));
+        sb.append(String.format("║ CHAMADOS ÚNICOS: %d%s║\n",
+                chamadosUnicos.size(),
+                " ".repeat(Math.max(0, 35 - String.valueOf(chamadosUnicos.size()).length()))));
+        sb.append("╠════════════════════════════════════════════════════════════╣\n");
+
+        if (!chamadosContagem.isEmpty()) {
+            sb.append("║ Ranking de chamados reincidentes:                 ║\n");
+            chamadosContagem.entrySet().stream()
+                    .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                    .forEach(e -> sb.append(String.format("║   #%s → %d ocorrência(s)%s║\n",
+                            e.getKey(),
+                            e.getValue(),
+                            " ".repeat(Math.max(0, 30 - e.getKey().length())))));
+        }
+
+        sb.append("╠════════════════════════════════════════════════════════════╣\n");
+
+        if (!chamadosUnicos.isEmpty()) {
+            sb.append("║ Chamados únicos do mês:                            ║\n");
+            sb.append("║ ").append(String.join(", ", chamadosUnicos)).append("\n");
+        } else {
+            sb.append("║ Nenhum número de chamado identificado.             ║\n");
+        }
+
+        sb.append("╚════════════════════════════════════════════════════════════╝\n");
+        sb.append("\nPressione Enter para continuar...\n");
+
+        return sb.toString();
+    }
+
 }

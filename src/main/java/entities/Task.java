@@ -4,7 +4,7 @@ public class Task implements Comparable<Task> {
     private Long id;
     private String descricao;
     private Categoria categoria;
-    private String cliente;   // antes era cooperativa
+    private String cliente;
     private Long duracaoMin;
 
     public Task() {

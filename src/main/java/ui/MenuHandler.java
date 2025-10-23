@@ -30,7 +30,6 @@ public class MenuHandler {
     public void iniciarMenu() {
         int opcao;
 
-        // Menu inicial - Seleção de data
         while (dia == null || dia.getData() == null) {
             ConsoleUtils.titulo();
             System.out.println("1 - Definir Data");
@@ -52,7 +51,6 @@ public class MenuHandler {
             }
         }
 
-        // Menu principal
         do {
             ConsoleUtils.titulo();
             int tam = dia.getTarefas().size() < 10 ? 58 : 59;
@@ -92,7 +90,6 @@ public class MenuHandler {
                 definirDataManual();
                 break;
             case 0:
-                // Sai do menu
                 break;
             default:
                 System.out.println("Selecione uma opção válida!");
@@ -238,28 +235,32 @@ public class MenuHandler {
             System.out.println("2 - Gerar Relatório MD do Dia");
             System.out.println("3 - Gerar Relatórios MD do Mês");
             System.out.println("4 - Excluir Relatórios MD do Mês Passado");
+            System.out.println("5 - Quantidade de Chamados por Semana");
+            System.out.println("6 - Quantidade de Chamados por Mês");
             System.out.println("0 - Voltar");
 
-            opcao = ConsoleUtils.lerInteiro("Digite um número: ", 0, 4, sc);
+            opcao = ConsoleUtils.lerInteiro("Digite um número: ", 0, 6, sc);
 
             ConsoleUtils.titulo();
             switch (opcao) {
                 case 1:
                     System.out.println(relatorioService.calcularHorasSemana(dia));
                     break;
-
                 case 2:
                     relatorioService.gerarRelatorioMarkdown(dia);
                     break;
-
                 case 3:
                     relatorioService.gerarRelatoriosMarkdownMes(dia);
                     break;
-
                 case 4:
                     relatorioService.excluirRelatorioMesPassado(dia);
                     break;
-
+                case 5:
+                    System.out.println(relatorioService.contarChamadosSemana(dia));
+                    break;
+                case 6:
+                    System.out.println(relatorioService.contarChamadosMes(dia));
+                    break;
                 case 0:
                     return;
 
