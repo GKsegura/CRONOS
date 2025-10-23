@@ -5,8 +5,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.io.IOException;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
 import entities.Dia;
@@ -15,6 +18,7 @@ import entities.Categoria;
 
 public class RelatorioService {
     DiaService diaService = new DiaService();
+
     public void gerarRelatorioMarkdown(Dia dia) {
         StringBuilder md = new StringBuilder();
 
@@ -131,6 +135,138 @@ public class RelatorioService {
         }
     }
 
+    /**
+     * Calcula as horas trabalhadas na semana atual
+     * @param diaReferencia Dia de referência para calcular a semana
+     * @return String formatada com o relatório da semana
+     */
+    public String calcularHorasSemana(Dia diaReferencia) {
+        LocalDate dataRef = diaReferencia.getData();
+
+        // Obtém segunda e sexta da semana
+        LocalDate segunda = dataRef.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate sexta = dataRef.with(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY));
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        List<DiaInfo> diasSemana = new ArrayList<>();
+        int totalMinutos = 0;
+        int diasTrabalhados = 0;
+
+        // Percorre todos os dias da semana (segunda a sexta)
+        LocalDate dataAtual = segunda;
+        while (!dataAtual.isAfter(sexta)) {
+            String dataFormatada = dataAtual.format(formatter);
+            Dia dia = diaService.buscarDia(dataFormatada);
+
+            DiaInfo info = new DiaInfo();
+            info.data = dataAtual;
+            info.dataFormatada = dataFormatada;
+            info.diaSemana = obterDiaSemana(dataAtual.getDayOfWeek());
+
+            if (dia != null && dia.getInicioTrabalho() != null && dia.getFimTrabalho() != null) {
+                int minutosDia = calcularMinutosTrabalhados(dia);
+                info.minutosTrabalhados = minutosDia;
+                info.horasFormatadas = formatarMinutosParaHoras(minutosDia);
+                totalMinutos += minutosDia;
+                diasTrabalhados++;
+            } else {
+                info.minutosTrabalhados = 0;
+                info.horasFormatadas = "--:--";
+            }
+
+            diasSemana.add(info);
+            dataAtual = dataAtual.plusDays(1);
+        }
+
+        // Formata resultado
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n╔════════════════════════════════════════════════════════╗\n");
+        sb.append("║     RELATÓRIO SEMANAL DE HORAS TRABALHADAS         ║\n");
+        sb.append("╠════════════════════════════════════════════════════════╣\n");
+        sb.append(String.format("║ Período: %s a %s          ║\n",
+                segunda.format(formatter),
+                sexta.format(formatter)));
+        sb.append("╠════════════════════════════════════════════════════════╣\n");
+
+        // Lista dias da semana - 56 caracteres internos
+        for (DiaInfo info : diasSemana) {
+            String linha = String.format(" %s - %s │ %s",
+                    info.diaSemana.trim(),
+                    info.dataFormatada,
+                    info.horasFormatadas);
+            // Completa com espaços até 56 caracteres
+            int espacosFaltando = 56 - linha.length();
+            sb.append("║").append(linha).append(" ".repeat(espacosFaltando)).append("║\n");
+        }
+
+        sb.append("╠════════════════════════════════════════════════════════╣\n");
+
+        // Dias trabalhados - 56 caracteres internos
+        String linhaDias = String.format(" Dias trabalhados: %d", diasTrabalhados);
+        sb.append("║").append(linhaDias).append(" ".repeat(56 - linhaDias.length())).append("║\n");
+
+        // Total de horas - 56 caracteres internos
+        String linhaTotal = String.format(" Total de horas: %s", formatarMinutosParaHoras(totalMinutos));
+        sb.append("║").append(linhaTotal).append(" ".repeat(56 - linhaTotal.length())).append("║\n");
+
+        // Calcula média diária - 56 caracteres internos
+        if (diasTrabalhados > 0) {
+            int mediaDiaria = totalMinutos / diasTrabalhados;
+            String linhaMedia = String.format(" Média diária: %s", formatarMinutosParaHoras(mediaDiaria));
+            sb.append("║").append(linhaMedia).append(" ".repeat(56 - linhaMedia.length())).append("║\n");
+        }
+
+        sb.append("╚════════════════════════════════════════════════════════╝\n");
+
+        return sb.toString();
+    }
+
+    /**
+     * Calcula os minutos trabalhados em um dia
+     */
+    private int calcularMinutosTrabalhados(Dia dia) {
+        if (dia.getInicioTrabalho() == null || dia.getFimTrabalho() == null) {
+            return 0;
+        }
+
+        int minutosTotais = (int) dia.getInicioTrabalho().until(dia.getFimTrabalho(),
+                java.time.temporal.ChronoUnit.MINUTES);
+
+        // Subtrai tempo de almoço
+        if (dia.getInicioAlmoco() != null && dia.getFimAlmoco() != null) {
+            int minutosAlmoco = (int) dia.getInicioAlmoco().until(dia.getFimAlmoco(),
+                    java.time.temporal.ChronoUnit.MINUTES);
+            minutosTotais -= minutosAlmoco;
+        }
+
+        return Math.max(0, minutosTotais);
+    }
+
+    /**
+     * Formata minutos para formato HH:mm
+     */
+    private String formatarMinutosParaHoras(int minutos) {
+        int horas = minutos / 60;
+        int mins = minutos % 60;
+        return String.format("%02d:%02d", horas, mins);
+    }
+
+    /**
+     * Retorna o nome do dia da semana em português
+     */
+    private String obterDiaSemana(DayOfWeek dayOfWeek) {
+        switch (dayOfWeek) {
+            case MONDAY: return  "Segunda";
+            case TUESDAY: return "Terça  ";
+            case WEDNESDAY: return "Quarta ";
+            case THURSDAY: return "Quinta ";
+            case FRIDAY: return "Sexta  ";
+            case SATURDAY: return "Sábado ";
+            case SUNDAY: return "Domingo";
+            default: return "       ";
+        }
+    }
 
     private String formatHora(java.time.LocalTime hora) {
         return hora == null ? "-" : hora.toString();
@@ -140,5 +276,16 @@ public class RelatorioService {
         long h = minutos / 60;
         long m = minutos % 60;
         return String.format("%dh%02dm", h, m);
+    }
+
+    /**
+     * Classe auxiliar para armazenar informações do dia
+     */
+    private static class DiaInfo {
+        LocalDate data;
+        String dataFormatada;
+        String diaSemana;
+        int minutosTrabalhados;
+        String horasFormatadas;
     }
 }

@@ -234,24 +234,29 @@ public class MenuHandler {
             System.out.println(resumoDia());
             System.out.println("-".repeat(60));
             System.out.println("=== RELATÓRIOS ===");
-            System.out.println("1 - Gerar Relatório MD do Dia");
-            System.out.println("2 - Gerar Relatórios MD do Mês");
-            System.out.println("3 - Excluir Relatórios MD do Mês Passado");
+            System.out.println("1 - Horas Trabalhadas na Semana");
+            System.out.println("2 - Gerar Relatório MD do Dia");
+            System.out.println("3 - Gerar Relatórios MD do Mês");
+            System.out.println("4 - Excluir Relatórios MD do Mês Passado");
             System.out.println("0 - Voltar");
 
-            opcao = ConsoleUtils.lerInteiro("Digite um número: ", 0, 3, sc);
+            opcao = ConsoleUtils.lerInteiro("Digite um número: ", 0, 4, sc);
 
             ConsoleUtils.titulo();
             switch (opcao) {
                 case 1:
-                    relatorioService.gerarRelatorioMarkdown(dia);
+                    System.out.println(relatorioService.calcularHorasSemana(dia));
                     break;
 
                 case 2:
-                    relatorioService.gerarRelatoriosMarkdownMes(dia);
+                    relatorioService.gerarRelatorioMarkdown(dia);
                     break;
 
                 case 3:
+                    relatorioService.gerarRelatoriosMarkdownMes(dia);
+                    break;
+
+                case 4:
                     relatorioService.excluirRelatorioMesPassado(dia);
                     break;
 

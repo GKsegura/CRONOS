@@ -19,6 +19,20 @@ public class DiaService {
         return diaRepository.insertDia(novoDia);
     }
 
+    /**
+     * Busca um dia específico pela data
+     * @param dataStr Data no formato dd/MM/yyyy
+     * @return Dia encontrado ou null se não existir
+     */
+    public Dia buscarDia(String dataStr) {
+        for (Dia d : diaRepository.findAll()) {
+            if (d.getDataFormatada().equals(dataStr)) {
+                return d;
+            }
+        }
+        return null;
+    }
+
     public void atualizarInicioTrabalho(Dia dia, LocalTime inicio) {
         dia.setInicioTrabalho(inicio);
         diaRepository.updateDia(dia);
